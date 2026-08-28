@@ -1,0 +1,248 @@
+name: Atlassian Preview
+entryKey: atlassian-preview
+serverUserType: singleUser
+shortDescription: "Early access to next-generation Atlassian MCP features: Teamwork Graph, Loom insights, dynamic discovery, and unified content"
+description: |
+  The preview endpoint for the official Atlassian Rovo Model Context Protocol (MCP) server (MCP v2). It provides early access to next-generation Atlassian intelligence capabilities, connecting AI agents directly with your Atlassian Cloud organization, Teamwork Graph, and real-time collaboration tools.
+  
+  ## Key Capabilities
+  - **Teamwork Graph**: Query and traverse connected cross-product context across Jira work items, Confluence pages, Loom videos, Atlas goals, Bitbucket repositories, Compass components, and third-party tools
+  - **Dynamic Discovery & Execution**: Discover and run specialized operations on-demand across the entire Atlassian ecosystem without overwhelming the context window (`discover` / `execute`)
+  - **Unified Confluence Content**: Create and update live documents, whiteboards, databases, pages, and smart links through a single modern content API
+  - **Loom Video Intelligence**: Retrieve video transcripts, chapters, AI-generated meeting summaries, and action items
+  - **Smart Jira & Sprint Operations**: Link issues, manage subtasks, organize sprints, and track cross-team dependencies
+  - **Rovo Semantic Search**: Enterprise-grade semantic search powered by Atlassian Rovo across all connected systems
+  - **Zero Configuration OAuth**: Seamless OAuth 2.0 authentication respecting user and organization permissions
+  
+  ## What you'll need to connect
+  
+  **No Setup Required**: Authentication is handled automatically through OAuth2 workflow.
+  
+  **Important for Admins**: To enable OAuth with Obot, your Atlassian organization admin must authorize the MCP endpoint:
+  1. Go to [Atlassian Administration](https://admin.atlassian.com) and select your organization
+  2. Navigate to **Apps > AI settings > Rovo MCP server**
+  3. Add your Obot domain (e.g., `https://your-obot-domain/**`)
+  
+  ## Example Usage
+  
+  Ask your AI assistant to:
+  - **Teamwork Graph** - "Find all Confluence pages, Loom recordings, and pull requests linked to Jira ticket ENG-240"
+  - **Loom Insights** - "Summarize the transcript and extract action items from our latest sprint planning Loom video"
+  - **Unified Content** - "Create a new architecture live document and link it to our project goal in Atlas"
+  - **Dynamic Operations** - "Discover and execute available operations for Jira service management"
+
+metadata:
+  categories: "Developer Tools"
+  allow-multiple: "true"
+icon: https://avatars.githubusercontent.com/u/168166?s=200&v=4
+repoURL: https://support.atlassian.com/atlassian-rovo-mcp-server/docs/getting-started-with-the-atlassian-remote-mcp-server/
+runtime: remote
+remoteConfig:
+  fixedURL: https://mcp.atlassian.com/v1/mcp/preview
+toolPreview:
+  - name: atlassianUserInfo
+    description: Returns the accountId of the current user
+    params: {}
+  - name: getAccessibleAtlassianResources
+    description: Returns the cloudId(s) available to the current user
+    params: {}
+  - name: discover
+    description: "Find available Atlassian operations by describing what you want to do. Searches the Atlassian operation catalog across Jira, Confluence, Compass, Loom, Teams (~206 operations loaded; the exact number searchable for your session — after auth, scope, toolset, and product filtering — is returned as searchableCount). Returns the operation name and inputs needed to call execute. When a match is already exposed as a primary tool it is returned under primaryTools instead of results. Only use an operation name from discover results or one already in your tool list; never guess, assume, or invent a name — when unsure, call discover first. Omit query (or set browse=true) to list the available operations grouped by product and category when you can't guess a search phrasing. Narrow either search or browse with intent (read/write/search) and/or entity (a subject hint like \"issue\", \"page\", \"space\"). Delete and manage intents are intentionally unsupported as discover filters."
+    params:
+      browse: List the available operations grouped by product/category instead of searching. Implied when query is omitted. Respects the same product/scope/toolset filters.
+      entity: "Free-text subject hint to narrow results by what the operation acts on, e.g. \"issue\", \"page\", \"space\", \"comment\". Matched against the operation name, description, search hints, and keywords. Composes with query, products, browse, and intent."
+      intent: "Filter to operations of a given action type, derived from each operation's toolset: read, write, or search (delete/manage are not filterable). Composes with query, products, browse, and entity."
+      maxResults: "Maximum search results to return (1-20). Default 5. Omit in browse mode. If supplied in browse mode, it is still validated as 1-20 but does not limit the browse response."
+      products: "Filter results to specific products. Supported: jira, confluence, compass, loom, teams."
+      query: "Natural language description of what you want to do, e.g. \"get transitions for an issue\" or \"list spaces\". Omit (or set browse=true) to list all available operations grouped by product/category."
+  - name: execute
+    description: |
+      Run an Atlassian operation by name. Supports REST, GraphQL, and function operations across all Atlassian products.
+      Only use an operation name from discover results or one already in your tool list; never guess, assume, or invent a name — when unsure, call discover first.
+      If the user provides a Jira/Confluence URL, pass it directly as cloudId — no need to call getAccessibleAtlassianResources.
+      Pass all inputs as a flat object — the server routes each to the right location (path, query, or body) automatically.
+      Use responseFields for field filtering, e.g. ["key","fields.summary","fields.status.name"].
+      Use view to select a named output preset (e.g. "compact", "evidence", "full") when the operation supports views.
+    params:
+      cloudId: "Site UUID or Jira/Confluence URL for this operation's Atlassian site. cloudId is never silently auto-resolved or reused for you — call getAccessibleAtlassianResources ONCE per session, cache the returned cloudId, and pass it explicitly on this and every subsequent call, since most operations need it. `execute` and its read/write/destructive variants strictly require it for cloudId-scoped operations and fail without it. Not needed for cloudId-less operations (e.g. Bitbucket), which ignore this field."
+      inputs: "Flat input object — pass all parameters here. The server routes each to path, query, or body automatically."
+      name: "Operation name to run. Only use an operation name from discover results or one already in your tool list; never guess, assume, or invent a name — when unsure, call discover first."
+      responseFields: "Dot-notation fields to return, e.g. [\"key\",\"fields.summary\"]. Filters response."
+      view: "Named output view preset (e.g. \"compact\", \"evidence\", \"full\"). Only applies when the operation declares views. Overridden by responseFields if both are supplied."
+  - name: search
+    description: "Semantically search Jira, Confluence, and connected third-party content using Rovo Search. ALWAYS use this tool to search for Jira and Confluence content unless CQL or JQL is specified."
+    params:
+      cloudId: "Site UUID or Jira/Confluence URL for this operation's Atlassian site. cloudId is never silently auto-resolved or reused for you — call getAccessibleAtlassianResources ONCE per session, cache the returned cloudId, and pass it explicitly on this and every subsequent call, since most operations need it. `execute` and its read/write/destructive variants strictly require it for cloudId-scoped operations and fail without it. Not needed for cloudId-less operations (e.g. Bitbucket), which ignore this field."
+      limit: Maximum number of search results to return.
+      query: The search query.
+      targetApp: "Filter results by product. ALL searches everything. JIRA returns only Jira issues/boards/projects. CONFLUENCE returns only Confluence pages/blogs/spaces. THIRD_PARTY returns connected external content (GitHub PRs, Loom videos, Google Docs, etc)."
+  - name: searchConfluence
+    description: Search Confluence content with CQL
+    params:
+      cloudId: "Site UUID or Jira/Confluence URL for this operation's Atlassian site. cloudId is never silently auto-resolved or reused for you — call getAccessibleAtlassianResources ONCE per session, cache the returned cloudId, and pass it explicitly on this and every subsequent call, since most operations need it. `execute` and its read/write/destructive variants strictly require it for cloudId-scoped operations and fail without it. Not needed for cloudId-less operations (e.g. Bitbucket), which ignore this field."
+      cql: "CQL query string (max 4096 chars). Examples: `type = page AND space = \"DEV\"`, `title ~ \"onboarding\" AND lastmodified > \"2025-01-01\"` , `creator = currentUser() AND type IN (page, blogpost) ORDER BY lastmodified DESC`."
+      cqlcontext: "JSON-encoded execution context, e.g. {\"spaceKey\":\"DEV\"}. Restricts the search to the supplied scope."
+      cursor: Opaque pagination cursor returned by a previous call. Omit to start from the first page.
+      expand: "Comma-separated list of content properties to expand on each result. Common values: `space`, `version`, `body.view`, `metadata.labels`, `ancestors`. Use sparingly to avoid large responses."
+      limit: Max number of results to return per page (1-100). Defaults to 25.
+  - name: searchJiraIssuesUsingJql
+    description: Search for Jira issues using JQL with optional count
+    params:
+      cloudId: "Cloud ID, site prefix (e.g. \"acme\"), or any Jira URL"
+      fields: "Fields per issue (e.g. [\"summary\", \"status\", \"customfield_10010\"]). customfield_* IDs are site-specific — discover the correct id for story points etc. on this Cloud site. Honoured exactly when supplied. Values map to issues[].fields.customFields (human labels), not raw customfield_* keys. Default compact view omits custom fields; use view: evidence for velocity/sprint JQL (fetches and maps all custom fields) or pass explicit customfield_* IDs."
+      jql: "JQL query string e.g. \"project = PROJ AND status = 'In Progress'\""
+      maxResults: "Maximum results to return (default 50, max 100)"
+      nextPageToken: Pagination token from a previous response to fetch the next page
+      responseContentFormat: "Format for rich-text bodies (description, environment, comments) when the view returns them. Defaults to markdown; html is lossless for a later editJiraIssue. Issues holding anything markdown cannot represent (media, panels, expands, statuses, @mentions) are returned as HTML automatically, decided per issue. An explicit markdown request is overridden for those bodies, with a warning saying so; appliedContentFormat in the response reports the format you actually got."
+      searchResultMode: "Default \"issues\". Never count for normal search or if nextPageToken used. If total for same query is known, reuse it. Use \"count\" only when no trusted count exists and either the user asks or a downstream step needs it. Use \"all\" only if both count and issues required."
+      validation: "Validation mode. \"none\" runs the search without parser preflight. \"strict\" validates the JQL before searching and fails fast on parser errors. When the query is valid, the response may include a validation block with warnings returned during preflight."
+      view: "Output view preset. Default: \"compact\". Options: \"compact\", \"evidence\", \"full\". compact = minimal fields for scanning; evidence = decision-relevant detail; full = complete response."
+  - name: getTeamworkGraphContext
+    description: |
+      Retrieves connected context from Teamwork Graph for any Atlassian entity. Returns all relationships and linked objects within one traversal – including cross-product and third-party connections. Use when the answer requires connections between entities, not just a single entity's fields.
+      
+      Supported entry points:
+      
+      Jira: issues, projects, sprints, versions, comments
+      
+      Confluence: pages, blogposts, whiteboards, databases, spaces
+      
+      Goals, Projects, Focus Areas, Tags and updates
+      
+      People: users, teams, organisations
+      
+      DevOps: PRs, repos, deployments, services, builds, designs
+      
+      Loom: videos, meetings
+      
+      Compass: components
+      
+      Assets: objects
+      
+      Incidents, conversations, calendar events, external documents
+      
+      After calling this tool, call getTeamworkGraphObject on returned ARIs to get full content.
+    params:
+      after: Pagination cursor for fetching the next page of results.
+      cloudId: Cloud ID (UUID or site URL)
+      detailLevel: "'summary' (counts/metadata) or 'full' (detailed content)."
+      first: Max number of related items to return.
+      objectIdentifier: "Identifier for the object. It could be a key (e.g. ENG-1234), ID, ARI, or full URL; format depends on objectType."
+      objectType: Type of object to fetch context for.
+      relationshipTypes: "Filter full results to specific relationship types to save tokens (e.g. 'jira-work-item-links-external-build' for Jira work items)."
+      targetObjectTypes: "Filter results to only include relationships targeting specific object types (e.g. AtlassianUser, ConfluenceComment)."
+      timeRange: Optional time range to filter relationships by creation or update time.
+  - name: getTeamworkGraphObject
+    description: Fetches the entire available data for one or more objects (Atlassian or third-party) using their ARIs or URLs. Use for the objects gathered from getTeamworkGraphContext tool.
+    params:
+      cloudId: Cloud ID (UUID or site URL)
+      objects: "A list of object identifiers to hydrate. Supports both ARIs (e.g., 'ari:cloud:jira::issue/123') and full browser URLs (e.g., 'https://mysite.atlassian.net/browse/PROJ-1')."
+  - name: addTeamworkGraphContext
+    description: "Adds a relationship between two entities in the Teamwork Graph (e.g. linking two Jira work items, marking one as blocking another, attaching a remote link, or connecting a Jira work item to an Atlas project or goal)."
+    params:
+      cloudId: Cloud ID (UUID or site URL)
+      objectIdentifier: "Identifier of the source entity. Accepts an ARI, a full URL, or a stable key (e.g. ENG-123 for a Jira work item). Format depends on relationshipType."
+      relationshipType: "Type of relationship to create. Determines which entity types 'objectIdentifier' and 'targetObjectIdentifier' must resolve to."
+      targetObjectIdentifier: "Identifier of the target entity. Accepts an ARI, a full URL, or a stable key (e.g. ATLAS-20426 for an Atlas project). Format depends on relationshipType."
+      title: Optional display label for the target. Used by relationships that surface a title (e.g. remote links); ignored otherwise.
+  - name: getConfluenceContent
+    description: "Read any Confluence content (page, blog, live doc, comment, whiteboard, embed, database, folder)"
+    params:
+      cloudId: "Site UUID or Jira/Confluence URL for this operation's Atlassian site. cloudId is never silently auto-resolved or reused for you — call getAccessibleAtlassianResources ONCE per session, cache the returned cloudId, and pass it explicitly on this and every subsequent call, since most operations need it. `execute` and its read/write/destructive variants strictly require it for cloudId-scoped operations and fail without it. Not needed for cloudId-less operations (e.g. Bitbucket), which ignore this field."
+      content_format: "Body format. Doc types: html (default) or markdown. Whiteboards: svg or png (png is read-only and returns a short-lived presigned URL to the file in body.value, not the image content). Databases: csv. URL-backed content such as embeds: url."
+      content_id: "Numeric Confluence content ID, or a Confluence tiny link key (the encoded part from /wiki/x/ URLs, e.g. 4_sXAQ). Recognized Confluence content URLs are also accepted and converted to the content ID, but prefer content_url for URLs. One of content_id or content_url is required."
+      content_url: "Full URL of the Confluence content. Supported: pages/live docs (/pages/{id}), blog URLs (/blog/{id}), whiteboards (/whiteboard/{id}), databases (/database/{id}), folders (/folder/{id}), and TinyUrl (/wiki/x/{key}). Prefer this for URLs copied from Confluence. One of content_id or content_url is required."
+      detail: "Response shape for document-style reads. summary = title + excerpt + counts (default, cheap). outline = heading tree (cheap, for navigation). full = body in the requested format (use when intending to edit). Non-document content such as whiteboards, databases, folders, and embeds does not support detail; content_format is a separate representation selector for formats such as whiteboard svg/png, database csv, or embed url."
+      draft: "If true, read the draft version instead of current. Only supported for pages and blog posts."
+      include_metadata: "Include extended metadata block (for example version, author, content state, and total view counts when available)."
+  - name: createConfluenceContent
+    description: "Before authoring content, first call getConfluenceSpaceInstructions for the target space — pass its spaceId or spaceKey, either works — and apply what it returns; when present, the space instructions are authoritative (tone, casing, structure, routing, what to avoid) and override your defaults on conflict. It is not a top-level tool here — invoke it through the generic operation runner (execute) as name=getConfluenceSpaceInstructions, inputs={spaceId or spaceKey}, passing cloudId at the top level of the execute call (not inside inputs); use discover to locate it if needed. Treat instructions as absent only when a successful call returns an empty body or the operation is unavailable — then author with your defaults and do not block. An \"Invalid URL\" / \"failed to fetch cloud id\" / \"tool not found\" error is a wrong invocation path, not an absent tool — fix and retry. Then create a new Confluence page, blog post, live doc, whiteboard, database, embed, smart link, or folder. Before authoring a body, get the content-format guide — it is not a top-level tool here: invoke it through the generic operation runner (execute) as name=getContentFormatGuide, inputs={toolName}, passing the create key for the content type as toolName: createConfluencePage (pages, blog posts, live docs), createConfluenceWhiteboard, or createConfluenceDatabase; use discover to locate it if needed."
+    params:
+      body: "Before composing this body you must have called getConfluenceSpaceInstructions for the target space and applied the result (see the tool description). Body content. For whiteboard and database it is technically optional, but only omit it when the user explicitly asked for an empty/blank board or database. Never omit body as a fallback because you could not load the authoring guidance — load it first via getContentFormatGuide through the generic operation runner (execute) as name=getContentFormatGuide, inputs={toolName} (createConfluencePage / createConfluenceWhiteboard / createConfluenceDatabase), then build a real body. A blank whiteboard (no shapes, stickies, connectors, or layout) is almost never the intended result. For doc types (page, live_doc, blogpost): format is html or markdown, value is the content string. For embed and smart_link: format must be url, value must be the URL to embed (e.g. https://example.com/design). For whiteboard: format must be svg and value must be the complete initial SVG document with root width, height, and viewBox. For database: format must be csv and value must be the complete initial CSV payload. For a synced (Smart) Folder (contentType=folder): format must be url and value must be the https URL of the external Google Drive, OneDrive, or SharePoint folder to sync from. Requires the confluence_smart_folders_milestone_1 experiment; otherwise the create returns FEATURE_NOT_ENABLED. Do not pass patches, edit envelopes, or context on create. Omit for a plain folder (no sync source) and for slide."
+      cloudId: "Site UUID or Jira/Confluence URL for this operation's Atlassian site. cloudId is never silently auto-resolved or reused for you — call getAccessibleAtlassianResources ONCE per session, cache the returned cloudId, and pass it explicitly on this and every subsequent call, since most operations need it. `execute` and its read/write/destructive variants strictly require it for cloudId-scoped operations and fail without it. Not needed for cloudId-less operations (e.g. Bitbucket), which ignore this field."
+      contentType: "Type of content to create. One of: page, live_doc, blogpost, whiteboard, database, embed, smart_link, folder, slide."
+      contentWidth: "Optional page width for doc types only: page, live_doc, and blogpost. Accepted values are narrow, wide, and max. Omit to use the default width, narrow. Non-doc content types do not support this field."
+      draft: "If true, create the content as a draft instead of publishing it. Only supported when contentType is page or blogpost."
+      parent: "Parent destination for the new content.  Use { \"spaceId\": \"<numeric-space-id>\" } to create at the homepage / sidebar root. Use { \"spaceId\": \"<numeric-space-id>\", \"parentContentId\": \"<numeric-content-id>\" } to create under an existing content item. Use { \"parentContentId\": \"<numeric-content-id>\" } when the parent content ID should be resolved to its space before creation. Use { \"parentContentUrl\": \"<confluence-content-url>\" } when the parent content URL should be resolved before creation.  Supported parentContentUrl paths include /pages/{id}, /blog/{id}, /whiteboard/{id}, /database/{id}, and /folder/{id}.  If the destination is described only by space key or title, resolve it first to one of the supported parent shapes above."
+      private: "If true, the created content is private to the caller: only the creator has view and edit access. Supported for page, live_doc, blogpost, whiteboard, database, and folder, including creation at the homepage / sidebar root. Private creation is not supported for embed, smart_link, or slide. Omit or pass false for default visibility."
+      title: Title for the new content. 1-255 characters.
+  - name: updateConfluenceContent
+    description: "Before authoring an edit, first call getConfluenceSpaceInstructions for the target space — pass its spaceId or spaceKey, either works — and apply what it returns; when present, the space instructions are authoritative (tone, casing, structure, routing, what to avoid) and override your defaults on conflict. It is not a top-level tool here — invoke it through the generic operation runner (execute) as name=getConfluenceSpaceInstructions, inputs={spaceId or spaceKey}, passing cloudId at the top level of the execute call (not inside inputs); use discover to locate it if needed. Treat instructions as absent only when a successful call returns an empty body or the operation is unavailable — then author with your defaults and do not block. An \"Invalid URL\" / \"failed to fetch cloud id\" / \"tool not found\" error is a wrong invocation path, not an absent tool — fix and retry. Then update Confluence docs, whiteboards, or databases. Before authoring an edit, get the content-format guide — it is not a top-level tool here: invoke it through the generic operation runner (execute) as name=getContentFormatGuide, inputs={toolName}, passing the update key for the content type as toolName: updateConfluencePage (pages, blog posts, live docs), updateConfluenceWhiteboard, or updateConfluenceDatabase; use discover to locate it if needed."
+    params:
+      body: "Before composing this body you must have called getConfluenceSpaceInstructions for the target space and applied the result (see the tool description). Body update object with format and value. Doc types accept format html or markdown. Whiteboards accept format svg and should include context.content with the current SVG when applying a patch. Databases accept format csv and should include context.content with the current CSV when applying an edit envelope. Put the raw patch/envelope directly in value; do not wrap it in an extra JSON object or {\"content\": \"...\"} wrapper. For whiteboards, value is a patch, not a full SVG replacement. For databases, value is an edit envelope, not a create payload. Mutually exclusive with edits."
+      cloudId: "Site UUID or Jira/Confluence URL for this operation's Atlassian site. cloudId is never silently auto-resolved or reused for you — call getAccessibleAtlassianResources ONCE per session, cache the returned cloudId, and pass it explicitly on this and every subsequent call, since most operations need it. `execute` and its read/write/destructive variants strictly require it for cloudId-scoped operations and fail without it. Not needed for cloudId-less operations (e.g. Bitbucket), which ignore this field."
+      contentId: Numeric Confluence content ID. One of contentId or contentUrl is required.
+      contentUrl: "Full URL of the Confluence content. One of contentId or contentUrl is required. Clear Confluence URLs for pages/live docs (/pages/{id}), blogs (/blog/{id}), whiteboards (/whiteboard/{id}), databases (/database/{id}), and folders (/folder/{id}) are normalized to their numeric content ID before the update is sent, so URLs copied from the product should work directly."
+      contentWidth: "Optional page width for doc types only: page, live_doc, and blogpost. Accepted values are narrow, wide, and max. The default width is narrow. Omit to keep the existing content width unchanged. A width-only update is valid and requires snapshotToken, but does not require title, body, or edits. Non-doc content types do not support this field."
+      draft: "If true, update the draft version instead of current. Only supported for page and blogpost doc edits."
+      dryRun: "If true, validate and preview the result without persisting. For edits, returns the resulting HTML. For body replacement, echoes the input."
+      edits: "Granular edit operations. Array of tool-call objects, each with name (replaceNode, insertNodeAfter, insertNodeBefore, deleteNode, removeNodes, moveNode, appendNodeToEnd, setAttrs), localId, value, and arguments. Mutually exclusive with body."
+      minorEdit: Whether to mark the new content version as a minor edit.
+      ownerId: "Atlassian account ID of the new owner to transfer page ownership to. Optional. This is an account ID (e.g. 5b10ac8d82e05b22cc7d4ef5), never an email/username or a content ID. The new owner must already have edit permission."
+      snapshotToken: Opaque token from a prior getConfluenceContent response. Required for doc-type updates that mutate page/blog/live_doc content or contentWidth. Not used for whiteboard svg or database csv object updates.
+      title: New title for the content. 1-255 characters. Omit to keep existing title.
+      versionMessage: Optional version comment/message for the content update.
+  - name: getJiraIssue
+    description: Get a Jira issue by key or ID
+    params:
+      cloudId: "Cloud ID, site prefix (e.g. \"acme\"), or any Jira URL"
+      expand: "Additional Jira expand tokens (comma-separated), e.g. \"renderedFields,changelog\". Merged with any expand the server adds for custom-field mapping (e.g. \"names\"); duplicate tokens removed. Note \"changelog\" here returns only the newest page, sorted NEWEST-first, and it ACCEPTS startAt/maxResults then ignores them — so it cannot be paged and reports a longer history as complete. Use listJiraIssueChangelogs to read all of it (oldest-first); do not mix their orderings."
+      failFast: "When true, forwards Jira's `failFast` query flag for this GET. Omit for Jira default behavior."
+      fields: "Custom Jira field IDs to fetch (e.g. [\"customfield_10010\", \"customfield_10020\"]). Overrides the view's fetch strategy — pair with responseFields to project what you fetched. For custom fields in normal use, prefer view: evidence which fetches and maps them automatically. Use [\"*all\"] to fetch every field (expensive — prefer view: full instead)."
+      fieldsByKeys: "When true, each entry in `fields` is interpreted as a Jira field key (e.g. \"summary\", \"description\") instead of a field id. Matches the Jira REST `fieldsByKeys` query parameter. Ignored when `fields` is omitted (default field list uses ids)."
+      issueIdOrKey: "Issue key (PROJ-123), numeric ID, or a Jira issue URL"
+      properties: "Issue entity property keys to return (Jira `properties` query param, repeated per key). Omit unless you rely on app-specific issue properties."
+      responseContentFormat: "Format for rich-text bodies (description, environment, comments). Defaults to markdown. Set html to receive HTML, which is lossless, so you can pass it straight back to editJiraIssue/addOrEditJiraIssueComment with contentFormat: html. Bodies holding anything markdown cannot represent — inline media, panels, expands, layouts, statuses, @mentions, dates, emoji, smart links — are returned as HTML automatically, because markdown would drop those nodes or turn them into literal text on write-back. An explicit markdown request is overridden for those bodies, with a warning saying so; appliedContentFormat in the response reports the format you actually got."
+      view: "Output view preset. Default: \"compact\". Options: \"compact\", \"evidence\", \"full\". compact = minimal fields for scanning; evidence = decision-relevant detail; full = complete response."
+  - name: createJiraIssue
+    description: Create a new Jira issue
+    params:
+      additional_fields: "Additional Jira fields. Keys can be human-readable field names OR raw customfield_* IDs. Values can be human-readable (resolved automatically) OR already-correct Jira shapes. Examples:   {\"Story Points\": 8}                          ← number field by name   {\"Team\": \"Backend\"}                          ← option/select by name   {\"Reviewers\": [\"alice@acme.com\", \"bob@acme.com\"]}  ← multi-user by accountId   {\"Component Area\": \"Platform / Auth\"}        ← cascading select as \"Parent / Child\"   {\"customfield_10010\": 8}                     ← raw ID (no resolution needed, fastest)   {\"components\": [{\"name\": \"Backend\"}]}        ← system array field (raw shape)   {\"fixVersions\": [{\"name\": \"v2.0\"}]}          ← system array field (raw shape) On error, the response includes allowedValues and a repairHint for self-correction."
+      assignToSprint: "Optional sprint assignment after the issue is created. Accepts a numeric sprint ID, an exact sprint name, or \"active\" to resolve an active sprint. Numeric sprint IDs assign directly and do not need board lookup. When omitted, createJiraIssue behaves exactly as before and does not make sprint calls."
+      assignee: Account ID of the assignee. Use lookupJiraAccountId to find it by name.
+      cloudId: "Cloud ID, site prefix (e.g. \"acme\"), or any Jira URL"
+      contentFormat: "Body format for description. Defaults to markdown; html adds panels, tables and status lozenges. For HTML body shapes, first get the format guide via the generic operation runner (execute) as name=getContentFormatGuide, inputs={toolName: \"createJiraIssue\"}. Inline media needs an existing issue: create first, then embed with editJiraIssue. When the HTML content-format feature is disabled the call is rejected rather than downgraded, because markdown would store the HTML tags as literal text."
+      description: "Issue description in markdown, or HTML with contentFormat html. Converted to Jira ADF automatically."
+      issueType: "Issue type name (e.g. Bug, Task, Story, Epic). Use listJiraProjectIssueTypesMetadata to list valid types for this project if unsure."
+      labels: "List of label strings (e.g. [\"bug\", \"needs-triage\"])."
+      parent: Parent issue key for sub-tasks or child issues (e.g. PROJ-10).
+      priority: "Priority name (e.g. High, Medium, Low, Highest, Lowest)."
+      projectKey: Project key (e.g. PROJ).
+      summary: Issue summary / title.
+  - name: editJiraIssue
+    description: "Edit an existing Jira issue. Fields can be cleared by passing explicit null, for example {\"resolution\": null}."
+    params:
+      additional_fields: "Additional Jira fields. Keys can be human-readable field names OR raw customfield_* IDs. Values can be human-readable (resolved automatically) OR already-correct Jira shapes. Examples:   {\"Story Points\": 8}                          ← number field by name   {\"Team\": \"Backend\"}                          ← option/select by name   {\"Reviewers\": [\"alice@acme.com\", \"bob@acme.com\"]}  ← multi-user by accountId   {\"Component Area\": \"Platform / Auth\"}        ← cascading select as \"Parent / Child\"   {\"customfield_10010\": 8}                     ← raw ID (no resolution needed, fastest)   {\"components\": [{\"name\": \"Backend\"}]}        ← system array field (raw shape)   {\"fixVersions\": [{\"name\": \"v2.0\"}]}          ← system array field (raw shape) On error, the response includes allowedValues and a repairHint for self-correction."
+      cloudId: "Cloud ID, site prefix (e.g. \"acme\"), or any Jira URL"
+      contentFormat: "Body format for rich-text fields (description/environment). Defaults to markdown. html preserves inline media across a read-modify-write; a body fetched as HTML can be written straight back (Jira resolves media collection/filename server-side and omits them on read — not data loss). Requires the HTML content-format feature; when it is disabled the call is rejected rather than downgraded, because markdown would store the HTML tags as literal text and drop the media."
+      fields: "Jira fields payload to set, keyed by field name or customfield_* ID. To clear a field, pass explicit null (e.g. {\"resolution\": null}). Rich-text fields (description/environment) default to markdown; set contentFormat: html to author them in HTML. Editing a body that already contains inline media MUST use contentFormat: html — markdown drops it. For HTML body shapes (inline media, panels, tables), first get the format guide via the generic operation runner (execute) as name=getContentFormatGuide, inputs={toolName: \"editJiraIssue\"}."
+      inlineFileCollection: "Media collection(s) from the upload step, paired to inlineFileId by index (a single value applies to all). Required whenever inlineFileId is set."
+      inlineFileId: "Media file ID(s) from uploadAttachmentToJiraIssue to append inline to the description, e.g. [\"id1\",\"id2\"]. Requires contentFormat: html and a matching inlineFileCollection (paired by index). Appends at the END, keeping existing content; for exact placement, author the media node in the HTML description instead. A file already embedded in the body is rejected (would duplicate)."
+      inlineFileName: "Optional file name(s) (from the upload step's fileName), paired to inlineFileId by index. Only selects the render shape: images render as a block image, other files as an inline chip. Omit to default to the image shape."
+      issueIdOrKey: Issue key (e.g. PROJ-123).
+      responseContentFormat: "Output format for rich-text fields in the returned issue. Defaults to markdown. Bodies markdown cannot represent (media, panels, expands, statuses, @mentions) are always returned as HTML, so a follow-up edit does not destroy them. An explicit markdown request is overridden for those bodies, with a warning saying so; appliedContentFormat in the response reports the format you actually got."
+  - name: transitionJiraIssue
+    description: "Transition a Jira issue to a new status, and/or assign it to a sprint or backlog"
+    params:
+      assignToBacklog: "Set true to assign the issue to the backlog, mutually exclusive with sprintId. Optionally use boardId to target a specific board's backlog."
+      boardId: "Only used when assignToBacklog is true: targets this specific board's backlog (board IDs from listJiraBoards). Ignored otherwise."
+      cloudId: The cloud ID of the Jira instance
+      fields: Optional Jira field values to apply during the workflow transition.
+      historyMetadata: Optional issue history metadata to attach to the workflow transition.
+      issueIdOrKey: Issue key like PROJ-123
+      sprintId: Assign the issue into this sprint. Mutually exclusive with assignToBacklog.
+      transitionId: Transition ID (get from listJiraIssueTransitions). Provide either transitionId or transitionName.
+      transitionName: "Transition name e.g. \"In Progress\", \"Done\". Resolved to ID automatically. Provide either transitionId or transitionName."
+      update: Optional Jira field update operations to apply during the workflow transition.
+  - name: getLoomVideo
+    description: |
+      Reads a Loom video's core metadata and optionally its transcript, comments, AI agent briefs, or AI-extracted meeting action items in one call via the expand input.
+      USE WHEN the user asks about a specific Loom video — its title, description, duration, owner, view/comment/reaction counts, what was said in it (pass expand: ["transcript"]), what feedback or comments people left on it (pass expand: ["comments"]), what the AI summarised as key points (pass expand: ["agentBriefs"]), or what follow-up tasks or action items the AI extracted from a meeting recording (pass expand: ["meetingActionItems"]).
+      DO NOT USE to get the downloadable MP4 file — use getLoomVideoDownloadUrl for that. To find a video's ARI first, use listLoomVideos or listLoomVideosSharedWithMe.
+    params:
+      cloudId: "Site UUID or Jira/Confluence URL for this operation's Atlassian site. cloudId is never silently auto-resolved or reused for you — call getAccessibleAtlassianResources ONCE per session, cache the returned cloudId, and pass it explicitly on this and every subsequent call, since most operations need it. `execute` and its read/write/destructive variants strictly require it for cloudId-scoped operations and fail without it. Not needed for cloudId-less operations (e.g. Bitbucket), which ignore this field."
+      commentsAfter: Pagination cursor to fetch the next page of comments when comments is included via expand.
+      commentsFirst: Maximum number of comments to return when comments is included via expand (1-100).
+      expand: "Optional list of extra data to include in the response, in addition to core metadata. Any subset of \"transcript\", \"comments\", \"agentBriefs\", \"meetingActionItems\". Omit for core metadata only — nothing is included by default."
+      videoAri: "ARI of the Loom video, formatted as ari:cloud:loom:{siteId}:video/activation/{activationId}/{videoId}. Provide this or videoUrl."
+      videoUrl: "Loom share URL for the video, for example https://www.loom.com/share/{videoId}. Used when videoAri is not supplied; a supporting action resolves the URL to an ARI."
