@@ -4,7 +4,7 @@ serverUserType: singleUser
 shortDescription: "Manage Jira issues, Confluence pages, and Compass services with AI assistance"
 description: |
   A Model Context Protocol (MCP) server that bridges between your Atlassian Cloud site and compatible external tools. Once configured, it enables those tools to interact with Jira, Compass, and Confluence data in real-time.
-  
+
   ## Features
   - **Smart Jira Management**: Create, update, search, and transition issues with AI assistance, manage comments, worklogs, and issue links
   - **Intelligent Confluence Operations**: Search content using CQL, create and update pages, manage comments (footer, inline, and replies), and navigate page hierarchies
@@ -13,20 +13,20 @@ description: |
   - **Advanced Filtering**: Use JQL for Jira issues and CQL for Confluence content with AI-powered natural language queries
   - **Zero Configuration**: OAuth flow handles authentication automatically - no API tokens or local setup needed
   - **Enterprise Ready**: Respects existing user permissions and access controls across all Atlassian products
-  
+
   ## What you'll need to connect
-  
+
   **No Setup Required**: Authentication is handled automatically through OAuth2 workflow.
-  
-  **Important for Admins**: To enable OAuth with Obot, your Atlassian admin must add the Obot callback URL domain:
+
+  **Important for Admins**: To enable OAuth with Agentic Coworker, your Atlassian admin must add the Agentic Coworker callback URL domain:
   1. Go to [Atlassian Administration](https://admin.atlassian.com) and select your organization
   2. Navigate to **Apps > AI settings > Rovo MCP server**
-  3. Add your Obot domain (e.g., `https://your-obot-domain/**`)
-  
+  3. Add your Agentic Coworker domain (e.g., `https://your-agentic-coworker-domain/**`)
+
   ## Example Usage
-  
+
   Ask your AI assistant to:
-  
+
   - **Jira Management** - "Update Jira ticket PROJ-123 status to In Progress" or "Log 2h of work on ticket PROJ-123"
   - **Confluence Search** - "Find our OKR guide in Confluence and summarize it" or "Search for authentication documentation"
   - **Content Creation** - "Create a tech design doc for XYZ feature in the Engineering space"
