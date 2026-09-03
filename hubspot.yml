@@ -14,7 +14,9 @@ description: |
   ## What you'll need to connect
 
   **Required:**
-  - **HubSpot private app access token**: You can find this in Settings -> Integrations -> Private Apps.
+  - **A HubSpot MCP Auth App**: register one under Development -> MCP Auth Apps in your HubSpot account, then give its client ID and client secret to your Obot administrator. The remote server accepts OAuth only -- a private app access token works with the local `@hubspot/mcp-server` package, not with this endpoint.
+
+  You are not asked to pick scopes when registering the app. HubSpot derives them from the tools this server exposes and from what you approve on the consent screen.
 
 metadata:
   categories: "Business, SaaS & API Integrations"
@@ -23,18 +25,12 @@ repoURL: https://www.npmjs.com/package/@hubspot/mcp-server
 runtime: remote
 remoteConfig:
   fixedURL: https://mcp.hubspot.com
-  # mcp.hubspot.com challenges with `WWW-Authenticate: Bearer`, but its
+  # mcp.hubspot.com takes OAuth 2.1 + PKCE and nothing else, and its
   # authorization-server metadata advertises no registration_endpoint, so
-  # dynamic client registration 404s. Without a header to carry the private
-  # app token this entry documents, the only path left was OAuth, and it
-  # could not complete.
-  headers:
-    - name: HubSpot Private App Access Token
-      key: Authorization
-      prefix: "Bearer "
-      description: Your HubSpot private app access token. Create one under Settings > Integrations > Private Apps.
-      sensitive: true
-      required: true
+  # dynamic registration 404s. The client has to be registered by hand in
+  # HubSpot (Development > MCP Auth Apps) and its id and secret given to Obot,
+  # which is what this flag makes Obot say instead of surfacing that 404.
+  staticOAuthRequired: true
 toolPreview:
   - name: hubspot-batch-create-associations
     description: |
