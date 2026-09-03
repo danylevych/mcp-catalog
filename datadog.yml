@@ -4,17 +4,17 @@ serverUserType: singleUser
 shortDescription: "Monitor incidents, logs, dashboards, metrics, APM traces, and infrastructure with Datadog"
 description: |
   A Model Context Protocol (MCP) server that provides access to Datadog's monitoring and observability platform. This server enables AI agents to interact with key Datadog features including incidents, monitors, logs, dashboards, metrics, APM traces, infrastructure monitoring, and RUM analytics through a comprehensive set of tools.
-  
+
   ## Features
   - **Observability Tools**: Leverage key Datadog monitoring features including incidents, monitors, logs, dashboards, and metrics through the MCP server
   - **Extensible Design**: Designed to easily integrate with additional Datadog APIs, allowing for seamless future feature expansion
-  
+
   ## What you'll need to connect
-  
+
   **Required:**
   - **Datadog API Key**: Your Datadog API key. API keys are unique to your organization. To create an API key, navigate to Organization settings, then click the `API keys`.
   - **Datadog App Key**: Your Datadog application key. Application keys are associated with the user account that created them and by default have the permissions of the user who created them. To add a Datadog application key, navigate to Organization Settings > Application Keys. If you have the permission to create application keys, click New Key.
-  
+
   **Optional:**
   - **Datadog Site**: The Datadog site of your organization, such as `datadoghq.eu` or `us3.datadoghq.com`. Default is `datadoghq.com`.
 
@@ -31,12 +31,17 @@ containerizedConfig:
     - mcp-server-datadog
 env:
   - name: Datadog API Key
+    key: DATADOG_API_KEY
     description: Your Datadog API key. API keys are unique to your organization.
+    sensitive: true
     required: true
   - name: Datadog App Key
+    key: DATADOG_APP_KEY
     description: Your Datadog application key. Application keys are associated with the user account that created them and by default have the permissions of the user who created them.
+    sensitive: true
     required: true
   - name: Datadog Site
+    key: DATADOG_SITE
     description: "(Optional) The Datadog site of your organization, such as `datadoghq.eu` or `us3.datadoghq.com`. Default is `datadoghq.com`."
     required: false
 toolPreview:

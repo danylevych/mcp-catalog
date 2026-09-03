@@ -1,0 +1,60 @@
+{
+    "kind": "AccessControlRule",
+    "apiVersion": "obot.obot.ai/v1",
+    "metadata": {
+        "name": "acr1hqx6q",
+        "generateName": "acr1",
+        "namespace": "default",
+        "uid": "30f075a7-178d-41ef-b06c-8424ffa0a61f",
+        "resourceVersion": "0",
+        "generation": 1,
+        "creationTimestamp": "2026-09-01T11:57:59Z",
+        "finalizers": [
+            "obot.obot.ai/access-control-rule"
+        ],
+        "managedFields": [
+            {
+                "manager": "Go-http-client",
+                "operation": "Update",
+                "apiVersion": "obot.obot.ai/v1",
+                "time": "2026-09-01T11:57:59Z",
+                "fieldsType": "FieldsV1",
+                "fieldsV1": {
+                    "f:metadata": {
+                        "f:finalizers": {
+                            ".": {},
+                            "v:\"obot.obot.ai/access-control-rule\"": {}
+                        },
+                        "f:generateName": {}
+                    },
+                    "f:spec": {
+                        "f:manifest": {
+                            "f:displayName": {},
+                            "f:resources": {},
+                            "f:subjects": {}
+                        },
+                        "f:mcpCatalogID": {}
+                    }
+                }
+            }
+        ]
+    },
+    "spec": {
+        "mcpCatalogID": "default",
+        "manifest": {
+            "displayName": "Test 2",
+            "subjects": [
+                {
+                    "type": "selector",
+                    "id": "*"
+                }
+            ],
+            "resources": [
+                {
+                    "type": "slackWorkspace",
+                    "id": "*"
+                }
+            ]
+        }
+    }
+}
